@@ -12,27 +12,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     g++ cmake gnupg && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Add NVIDIA's CUDA repository and install CUDA 12.8 Toolkit
-RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-ubuntu2204.pin && \
-    mv cuda-ubuntu2204.pin /etc/apt/preferences.d/cuda-repository-pin-600 && \
-    wget https://developer.download.nvidia.com/compute/cuda/12.8.0/local_installers/cuda-repo-ubuntu2204-12-8-local_12.8.0-565.57.01-1_amd64.deb && \
-    dpkg -i cuda-repo-ubuntu2204-12-8-local_12.8.0-565.57.01-1_amd64.deb && \
-    cp /var/cuda-repo-ubuntu2204-12-8-local/cuda-*-keyring.gpg /usr/share/keyrings/ && \
-    apt-get update -o Acquire::AllowInsecureRepositories=true -o Acquire::AllowDowngradeToInsecureRepositories=true && \
-    apt-get -y --allow-unauthenticated install cuda-toolkit-12-8 && \
-    apt-get -y --allow-unauthenticated install cuda-drivers && \
+# Add NVIDIA's CUDA repository using keyring and install CUDA 12.8 Toolkit
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb && \
+    dpkg -i cuda-keyring_1.1-1_all.deb && \
+    apt-get update && \
+    apt-get -y install cuda-toolkit-12-8 && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* /tmp/* && \
-    rm -f cuda-repo-ubuntu2204-12-8-local_12.8.0-565.57.01-1_amd64.deb
+    rm -f cuda-keyring_1.1-1_all.deb
 
-# Install CuDNN 9.9.0 (required for CUDA 12.8 and RTX 5080 support)
-RUN wget https://developer.download.nvidia.com/compute/cudnn/9.9.0/local_installers/cudnn-local-repo-ubuntu2204-9.9.0_1.0-1_amd64.deb && \
-    dpkg -i cudnn-local-repo-ubuntu2204-9.9.0_1.0-1_amd64.deb && \
-    cp /var/cudnn-local-repo-ubuntu2204-9.9.0/cudnn-*-keyring.gpg /usr/share/keyrings/ && \
-    apt-get update -o Acquire::AllowInsecureRepositories=true -o Acquire::AllowDowngradeToInsecureRepositories=true && \
-    apt-get -y --allow-unauthenticated install cudnn && \
-    apt-get -y --allow-unauthenticated install cudnn-cuda-12 && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* /tmp/* && \
-    rm -f cudnn-local-repo-ubuntu2204-9.9.0_1.0-1_amd64.deb
+# Install cuDNN (compatible with CUDA 12.8 and RTX 5080 support)
+RUN apt-get update && \
+    apt-get -y install cudnn-cuda-12 && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* /tmp/*
 
 # Install Python dependencies from requirements.txt
 ADD https://raw.githubusercontent.com/stujenn/microWakeWord-Custom-Trainer/refs/heads/main/requirements.txt /tmp/requirements.txt
