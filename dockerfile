@@ -12,10 +12,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     g++ cmake gnupg && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Create symlinks for python3.10 to ensure compatibility
-RUN ln -sf /usr/bin/python3 /usr/bin/python3.10 && \
-    ln -sf /usr/bin/pip3 /usr/bin/pip
-
 # Add NVIDIA's CUDA repository and install CUDA 12.8 Toolkit
 RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-ubuntu2204.pin && \
     mv cuda-ubuntu2204.pin /etc/apt/preferences.d/cuda-repository-pin-600 && \
