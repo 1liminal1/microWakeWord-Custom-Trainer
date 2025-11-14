@@ -1,45 +1,42 @@
-# Use Ubuntu 20.04 as the base image
-FROM ubuntu:20.04
+# Use Ubuntu 22.04 as the base image (includes Python 3.10 by default)
+FROM ubuntu:22.04
 
 # Set environment variables for non-interactive installations and Python buffering
 ENV DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
 
-# Install system dependencies
+# Install system dependencies including Python 3.10 (default on 22.04)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    wget curl git unzip software-properties-common build-essential \
-    libsndfile1 libffi-dev python3-dev g++ cmake gnupg && \
+    wget curl git unzip build-essential \
+    libsndfile1 libffi-dev python3-dev python3-pip python3-venv \
+    g++ cmake gnupg && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Add deadsnakes PPA for Python 3.10
-RUN add-apt-repository ppa:deadsnakes/ppa && \
-    apt-get update && apt-get install -y python3.10 python3.10-dev python3.10-venv && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Install pip for Python 3.10
-RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
+# Create symlinks for python3.10 to ensure compatibility
+RUN ln -sf /usr/bin/python3 /usr/bin/python3.10 && \
+    ln -sf /usr/bin/pip3 /usr/bin/pip
 
 # Add NVIDIA's CUDA repository and install CUDA 12.8 Toolkit
-RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin && \
-    mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600 && \
-    wget https://developer.download.nvidia.com/compute/cuda/12.8.0/local_installers/cuda-repo-ubuntu2004-12-8-local_12.8.0-565.57.01-1_amd64.deb && \
-    dpkg -i cuda-repo-ubuntu2004-12-8-local_12.8.0-565.57.01-1_amd64.deb && \
-    cp /var/cuda-repo-ubuntu2004-12-8-local/cuda-*-keyring.gpg /usr/share/keyrings/ && \
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-ubuntu2204.pin && \
+    mv cuda-ubuntu2204.pin /etc/apt/preferences.d/cuda-repository-pin-600 && \
+    wget https://developer.download.nvidia.com/compute/cuda/12.8.0/local_installers/cuda-repo-ubuntu2204-12-8-local_12.8.0-565.57.01-1_amd64.deb && \
+    dpkg -i cuda-repo-ubuntu2204-12-8-local_12.8.0-565.57.01-1_amd64.deb && \
+    cp /var/cuda-repo-ubuntu2204-12-8-local/cuda-*-keyring.gpg /usr/share/keyrings/ && \
     apt-get update -o Acquire::AllowInsecureRepositories=true -o Acquire::AllowDowngradeToInsecureRepositories=true && \
     apt-get -y --allow-unauthenticated install cuda-toolkit-12-8 && \
     apt-get -y --allow-unauthenticated install cuda-drivers && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* /tmp/* && \
-    rm -f cuda-repo-ubuntu2004-12-8-local_12.8.0-565.57.01-1_amd64.deb
+    rm -f cuda-repo-ubuntu2204-12-8-local_12.8.0-565.57.01-1_amd64.deb
 
 # Install CuDNN 9.9.0 (required for CUDA 12.8 and RTX 5080 support)
-RUN wget https://developer.download.nvidia.com/compute/cudnn/9.9.0/local_installers/cudnn-local-repo-ubuntu2004-9.9.0_1.0-1_amd64.deb && \
-    dpkg -i cudnn-local-repo-ubuntu2004-9.9.0_1.0-1_amd64.deb && \
-    cp /var/cudnn-local-repo-ubuntu2004-9.9.0/cudnn-*-keyring.gpg /usr/share/keyrings/ && \
+RUN wget https://developer.download.nvidia.com/compute/cudnn/9.9.0/local_installers/cudnn-local-repo-ubuntu2204-9.9.0_1.0-1_amd64.deb && \
+    dpkg -i cudnn-local-repo-ubuntu2204-9.9.0_1.0-1_amd64.deb && \
+    cp /var/cudnn-local-repo-ubuntu2204-9.9.0/cudnn-*-keyring.gpg /usr/share/keyrings/ && \
     apt-get update -o Acquire::AllowInsecureRepositories=true -o Acquire::AllowDowngradeToInsecureRepositories=true && \
     apt-get -y --allow-unauthenticated install cudnn && \
     apt-get -y --allow-unauthenticated install cudnn-cuda-12 && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* /tmp/* && \
-    rm -f cudnn-local-repo-ubuntu2004-9.9.0_1.0-1_amd64.deb
+    rm -f cudnn-local-repo-ubuntu2204-9.9.0_1.0-1_amd64.deb
 
 # Install Python dependencies from requirements.txt
 ADD https://raw.githubusercontent.com/stujenn/microWakeWord-Custom-Trainer/refs/heads/main/requirements.txt /tmp/requirements.txt
