@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Add deadsnakes PPA for Python 3.10
 RUN add-apt-repository ppa:deadsnakes/ppa && \
-    apt-get update && apt-get install -y python3.10 python3.10-dev python3.10-distutils && \
+    apt-get update && apt-get install -y python3.10 python3.10-dev python3.10-venv && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install pip for Python 3.10
