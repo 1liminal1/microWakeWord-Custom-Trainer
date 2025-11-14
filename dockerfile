@@ -19,34 +19,37 @@ RUN add-apt-repository ppa:deadsnakes/ppa && \
 # Install pip for Python 3.10
 RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.10
 
-# Add NVIDIA's CUDA repository and install CUDA 12.4 Toolkit
+# Add NVIDIA's CUDA repository and install CUDA 12.8 Toolkit
 RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin && \
     mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600 && \
-    wget https://developer.download.nvidia.com/compute/cuda/12.4.0/local_installers/cuda-repo-ubuntu2004-12-4-local_12.4.0-550.54.14-1_amd64.deb && \
-    dpkg -i cuda-repo-ubuntu2004-12-4-local_12.4.0-550.54.14-1_amd64.deb && \
-    cp /var/cuda-repo-ubuntu2004-12-4-local/cuda-*-keyring.gpg /usr/share/keyrings/ && \
+    wget https://developer.download.nvidia.com/compute/cuda/12.8.0/local_installers/cuda-repo-ubuntu2004-12-8-local_12.8.0-565.57.01-1_amd64.deb && \
+    dpkg -i cuda-repo-ubuntu2004-12-8-local_12.8.0-565.57.01-1_amd64.deb && \
+    cp /var/cuda-repo-ubuntu2004-12-8-local/cuda-*-keyring.gpg /usr/share/keyrings/ && \
     apt-get update -o Acquire::AllowInsecureRepositories=true -o Acquire::AllowDowngradeToInsecureRepositories=true && \
-    apt-get -y --allow-unauthenticated install cuda-toolkit-12-4 && \
+    apt-get -y --allow-unauthenticated install cuda-toolkit-12-8 && \
     apt-get -y --allow-unauthenticated install cuda-drivers && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* /tmp/* && \
-    rm -f cuda-repo-ubuntu2004-12-4-local_12.4.0-550.54.14-1_amd64.deb
+    rm -f cuda-repo-ubuntu2004-12-8-local_12.8.0-565.57.01-1_amd64.deb
 
-# Install CuDNN 9.3
-RUN wget https://developer.download.nvidia.com/compute/cudnn/9.3.0/local_installers/cudnn-local-repo-ubuntu2004-9.3.0_1.0-1_amd64.deb && \
-    dpkg -i cudnn-local-repo-ubuntu2004-9.3.0_1.0-1_amd64.deb && \
-    cp /var/cudnn-local-repo-ubuntu2004-9.3.0/cudnn-*-keyring.gpg /usr/share/keyrings/ && \
+# Install CuDNN 9.9.0 (required for CUDA 12.8 and RTX 5080 support)
+RUN wget https://developer.download.nvidia.com/compute/cudnn/9.9.0/local_installers/cudnn-local-repo-ubuntu2004-9.9.0_1.0-1_amd64.deb && \
+    dpkg -i cudnn-local-repo-ubuntu2004-9.9.0_1.0-1_amd64.deb && \
+    cp /var/cudnn-local-repo-ubuntu2004-9.9.0/cudnn-*-keyring.gpg /usr/share/keyrings/ && \
     apt-get update -o Acquire::AllowInsecureRepositories=true -o Acquire::AllowDowngradeToInsecureRepositories=true && \
     apt-get -y --allow-unauthenticated install cudnn && \
     apt-get -y --allow-unauthenticated install cudnn-cuda-12 && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* /tmp/* && \
-    rm -f cudnn-local-repo-ubuntu2004-9.3.0_1.0-1_amd64.deb
+    rm -f cudnn-local-repo-ubuntu2004-9.9.0_1.0-1_amd64.deb
 
 # Install Python dependencies from requirements.txt
 ADD https://raw.githubusercontent.com/stujenn/microWakeWord-Custom-Trainer/refs/heads/main/requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
-# Ensure numpy is installed for Python 3.10
-RUN python3.10 -m pip install --no-cache-dir numpy==1.26.4
+# Install PyTorch 2.7.1 with CUDA 12.8 support (required for RTX 5080 sm_120)
+RUN python3.10 -m pip install --no-cache-dir torch==2.7.1 torchaudio==2.7.1 --index-url https://download.pytorch.org/whl/cu128
+
+# Ensure numpy 2.0.2 is installed for Python 3.10 (required for numba 0.60.0 and RTX 5080)
+RUN python3.10 -m pip install --no-cache-dir numpy==2.0.2
 
 # Create a data directory for external mapping
 RUN mkdir -p /data
