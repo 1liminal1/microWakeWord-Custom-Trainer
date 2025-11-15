@@ -12,6 +12,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     g++ cmake gnupg && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Upgrade pip to latest version (needed for modern package installations)
+RUN python3.10 -m pip install --no-cache-dir --upgrade pip setuptools wheel
+
 # Add NVIDIA's CUDA repository using keyring and install CUDA 12.8 Toolkit
 RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb && \
     dpkg -i cuda-keyring_1.1-1_all.deb && \
@@ -34,6 +37,10 @@ RUN python3.10 -m pip install --no-cache-dir torch==2.7.1 torchaudio==2.7.1 --in
 
 # Ensure numpy 2.0.2 is installed for Python 3.10 (required for numba 0.60.0 and RTX 5080)
 RUN python3.10 -m pip install --no-cache-dir numpy==2.0.2
+
+# Pre-install piper-sample-generator for wake word sample generation
+RUN git clone https://github.com/rhasspy/piper-sample-generator /opt/piper-sample-generator && \
+    python3.10 -m pip install --no-cache-dir -e /opt/piper-sample-generator
 
 # Create a data directory for external mapping
 RUN mkdir -p /data
