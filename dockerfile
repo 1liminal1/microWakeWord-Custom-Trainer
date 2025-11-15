@@ -52,8 +52,8 @@ RUN mkdir -p /data
 ADD https://raw.githubusercontent.com/stujenn/microWakeWord-Custom-Trainer/refs/heads/main/basic_training_notebook.ipynb /root/basic_training_notebook.ipynb
 ADD https://raw.githubusercontent.com/stujenn/microWakeWord-Custom-Trainer/refs/heads/main/advanced_training_notebook.ipynb /root/advanced_training_notebook.ipynb
 
-# Download startup script from GitHub (avoids Windows line ending issues)
-ADD https://raw.githubusercontent.com/stujenn/microWakeWord-Custom-Trainer/refs/heads/claude/check-rtx-5080-support-01Sc3kR9PK9YwHEEjqyrHoWi/startup.sh /usr/local/bin/startup.sh
+# Copy startup script (.gitattributes ensures correct line endings)
+COPY startup.sh /usr/local/bin/startup.sh
 RUN chmod +x /usr/local/bin/startup.sh
 
 # Ensure /data is the default directory for Jupyter
