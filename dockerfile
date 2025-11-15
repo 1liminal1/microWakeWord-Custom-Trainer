@@ -40,7 +40,10 @@ RUN python3.10 -m pip install --no-cache-dir numpy==2.0.2
 
 # Pre-install piper-sample-generator for wake word sample generation
 RUN git clone https://github.com/rhasspy/piper-sample-generator /opt/piper-sample-generator && \
-    python3.10 -m pip install --no-cache-dir -e /opt/piper-sample-generator
+    python3.10 -m pip install --no-cache-dir -e /opt/piper-sample-generator && \
+    mkdir -p /opt/piper-sample-generator/models && \
+    wget -O /opt/piper-sample-generator/models/en_US-libritts_r-medium.pt \
+    'https://github.com/rhasspy/piper-sample-generator/releases/download/v2.0.0/en_US-libritts_r-medium.pt'
 
 # Create a data directory for external mapping
 RUN mkdir -p /data
@@ -49,8 +52,8 @@ RUN mkdir -p /data
 ADD https://raw.githubusercontent.com/stujenn/microWakeWord-Custom-Trainer/refs/heads/main/basic_training_notebook.ipynb /root/basic_training_notebook.ipynb
 ADD https://raw.githubusercontent.com/stujenn/microWakeWord-Custom-Trainer/refs/heads/main/advanced_training_notebook.ipynb /root/advanced_training_notebook.ipynb
 
-# Add the startup script from GitHub
-ADD https://raw.githubusercontent.com/stujenn/microWakeWord-Custom-Trainer/refs/heads/main/startup.sh /usr/local/bin/startup.sh
+# Add the updated startup script (creates piper-sample-generator symlink)
+COPY startup.sh /usr/local/bin/startup.sh
 RUN chmod +x /usr/local/bin/startup.sh
 
 # Ensure /data is the default directory for Jupyter

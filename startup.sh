@@ -1,19 +1,17 @@
 #!/bin/bash
 
-# Check if basic training notebook exists in /data
+# Copy notebooks to /data if they don't exist
 if [ ! -f /data/basic_training_notebook.ipynb ]; then
-    echo "Basic training notebook not found in /data. Copying the default notebook..."
-    cp /root/basic_training_notebook.ipynb /data/basic_training_notebook.ipynb
-else
-    echo "Basic training notebook already exists in /data. Skipping copy."
+    cp /root/basic_training_notebook.ipynb /data/
 fi
 
-# Check if advanced training notebook exists in /data
 if [ ! -f /data/advanced_training_notebook.ipynb ]; then
-    echo "Advanced training notebook not found in /data. Copying the default notebook..."
-    cp /root/advanced_training_notebook.ipynb /data/advanced_training_notebook.ipynb
-else
-    echo "Advanced training notebook already exists in /data. Skipping copy."
+    cp /root/advanced_training_notebook.ipynb /data/
+fi
+
+# Create symlink to piper-sample-generator if it doesn't exist
+if [ ! -e /data/piper-sample-generator ]; then
+    ln -s /opt/piper-sample-generator /data/piper-sample-generator
 fi
 
 exec "$@"
