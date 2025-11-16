@@ -9,7 +9,8 @@ Easily train microWakeWord detection models with this pre-built Docker image.
 
 - Docker installed on your system.
 - An NVIDIA GPU with CUDA support (optional but recommended for faster training).
-  - **RTX 50-series support**: This Docker image now supports NVIDIA RTX 5080 and other Blackwell GPUs (compute capability sm_120) with CUDA 12.8, PyTorch 2.7.1, and cuDNN for CUDA 12.
+  - **⚠️ RTX 50-series (5080/5090) NOT SUPPORTED**: TensorFlow 2.18 does not support Blackwell GPUs (compute capability sm_120). Training will fail with CUDA_ERROR_INVALID_PTX. Use RTX 30/40-series or train on CPU.
+  - PyTorch 2.7.1 with CUDA 12.8 is included for sample generation only.
 
 ## Quick Start
 
